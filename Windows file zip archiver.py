@@ -11,8 +11,7 @@ def main():
     
     validpath(src, dest)
     
-    #Check to see if src and destination are valid directories
-
+#Check to see if src and destination are valid directories
 def validpath(*argv):
     for path in argv:
         path = os.path.abspath(path)
