@@ -19,6 +19,8 @@ def validpath(*argv):
             print(path, 'is not a valid directory or file.')
             break
             
+def useroptions():
+    pass
 
 if __name__ == '__main__':
     main()
