@@ -10,6 +10,10 @@ def main():
         dest = src
     
     validpath(src, dest)
+
+    # check for user options 
+    # Will be using a series of input() functions to grab user input for options in lieu of a proper GUI
+    # may consider just using flags in the future 
     
 #Check to see if src and destination are valid directories
 def validpath(*argv):
@@ -20,7 +24,23 @@ def validpath(*argv):
             break
             
 def useroptions():
-    pass
+
+    # Allows users some options to how the files are archived
+    print('Select the sorting type in order from highest level to lowest. Each flag can only be used once')
+    flags = input('d: sort by date (day); m: sort by year and month; t: sort by file type; f: by folder; a: alphanumeric; s: size; n: none (or zip as is); h or help: help')
+    if 'n' in flags:
+        flags = 'n'
+    elif 'h' in flags:
+        print('An example would be: mdt which would first sort the files into folders labeled by the year and month, then inside these folder there are folders labeling the days and lastly inside the date folders there will be folders sorting the files by file type. ')
+
+    else:
+        options = len(flags)
+    
+    for opt in flags:
+        pass
+
+     
+    
 
 if __name__ == '__main__':
     main()
