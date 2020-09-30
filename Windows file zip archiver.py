@@ -1,46 +1,51 @@
 #Windows file archiver
-import zipfile, os, shutil
+import zipfile, os, shutil, argparse
 
-def main():
-    src = input("Please enter the complete file extension or folder of where/what you want to archive:\n")
-    dest = input("Enter the desired destination for the zipped file, leave empty if destination is the same locationas the source:\n")
-   
-    #Set dest to src if dest is not given
-    if dest  == '':
-        dest = src
-    
-    validpath(src, dest)
+# parse through arguments
+parser = argparse.ArgumentParser(description='Archive and sort some files. List sort options in order by hierarchy.')
+parser.add_argument('src', metavar='src', type=str, help='Target File')
+parser.add_argument('dest', metavar='dest', nargs = '?', type=str, default = '', help='Target Directory')
+parser.add_argument('--year', action='store_true', help='sort files into folders by year')
+parser.add_argument('--file', action='store_true', help='sort files into folders by file type')
+parser.add_argument('--month', action='store_true', help='sort files into folders by month')
+parser.add_argument('--day', action='store_true', help='sort files into folders by day')
 
-    # check for user options 
-    # Will be using a series of input() functions to grab user input for options in lieu of a proper GUI
-    # may consider just using flags in the future 
-    
-#Check to see if src and destination are valid directories
+args = parser.parse_args()
+
+# [REMOVE] check to see the value of argument and if they were parsed correctly
+print(args)
+print(args.src, args.dest)
+
+# Check to see if src and destination are valid directories
+
 def validpath(*argv):
     for path in argv:
         path = os.path.abspath(path)
         if not(os.path.exists(path)):
             print(path, 'is not a valid directory or file.')
-            break
-            
-def useroptions():
+            return False
+    return True
 
-    # Allows users some options to how the files are archived
-    print('Select the sorting type in order from highest level to lowest. Each flag can only be used once')
-    flags = input('d: sort by date (day); m: sort by year and month; t: sort by file type; f: by folder; a: alphanumeric; s: size; n: none (or zip as is); h or help: help')
-    if 'n' in flags:
-        flags = 'n'
-    elif 'h' in flags:
-        print('An example would be: mdt which would first sort the files into folders labeled by the year and month, then inside these folder there are folders labeling the days and lastly inside the date folders there will be folders sorting the files by file type. ')
-
+# copy file to target destination, or to the same directory as source file
+# [REMOVE] dest is already processed to either having a value or defaulting to same 
+# location as source file no need to branch off into two possibilities
+def copy(src, dest):
+    if os.path.isdir(dest):
+        shutil.copy(src, dest)
     else:
-        options = len(flags)
-    
-    for opt in flags:
-        pass
+        shutil.copy(src, dest)
 
-     
-    
+   
+#Set dest to src if dest is not given
+dest = args.dest
+src = args.src
 
-if __name__ == '__main__':
-    main()
+if dest  == '':
+    dest = src
+    
+if (not validpath(src, dest)):
+    pass
+else:
+    pass
+    #look at the options and sort accordingly
+
