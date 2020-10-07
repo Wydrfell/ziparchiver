@@ -29,23 +29,74 @@ def validpath(*argv):
 # copy file to target destination, or to the same directory as source file
 # [REMOVE] dest is already processed to either having a value or defaulting to same 
 # location as source file no need to branch off into two possibilities
-def copy(src, dest):
-    if os.path.isdir(dest):
-        shutil.copy(src, dest)
+def is_dir(path):
+    if os.path.isdir(path):
+        return True
     else:
-        shutil.copy(src, dest)
+        return False
 
-   
-#Set dest to src if dest is not given
-dest = args.dest
-src = args.src
+def get_filename(path):
+    i = len(path)
+    while path[i-1] != "\\":
+        i -= 1
+    return path[i:]
 
-if dest  == '':
-    dest = src
-    
-if (not validpath(src, dest)):
-    pass
+def filetraverse(depth, filedir):
+
+    for folderName, subfolder, files in os.walk(filedir):
+        for files in folderName:
+            fname = get_filename(files)
+            #shutil.copy(src, dest)
+def options():
+    if args.day:
+        # filetraverse
+        # create copy foldername
+        os.makedirs(dest, exist_ok = True)
+        if not isfile:
+            pass
+            # filetraverse(1, src)
+        else:
+            zfile = zipfile.ZipFile(dest)
+
+        print("Date Selected")
+
+# Gives absolute path, returns current directory if path is empty string
+dest = os.path.abspath(args.dest)
+src = os.path.abspath(args.src)
+print(f"These are the abspaths:\n{src}\n{dest}")
+
+# check if src is a dir or a file
+# If it is not a dir check to see if it is a file
+if not os.path.isdir(src):
+    print("The filename is:", get_filename(src))
+    fname = get_filename(src)
+    filedir = src.replace("\\" + fname, "")
+    os.chdir(filedir)
+    print("filedir:", filedir)
+    print("join:", os.path.join(filedir,fname))
+    if not os.path.isfile(fname):
+        print(src, os.path.isfile(fname))
+    else:
+    # Set dest to filedir if dest is not given
+        if dest  == '':
+            dest = filedir
+
+        # [REMOVE]    
+        print(f"These are the directories:\n{filedir}\n{dest}")
+        # options()
+        if args.day:
+            # filetraverse
+            # create copy foldername
+            os.makedirs(dest, exist_ok = True)
+            zfile = zipfile.ZipFile(dest)
+
+            print("Date Selected")
+
+# if it is a dir
 else:
-    pass
-    #look at the options and sort accordingly
+    # Set dest to src if dest is not given
+    if dest  == '':
+        dest = src
 
+    # [REMOVE]    
+    print(f"These are the directories:\n{filedir}\n{dest}")
