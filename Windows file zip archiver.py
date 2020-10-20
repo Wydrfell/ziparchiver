@@ -18,8 +18,6 @@ def getFilename(path):
         i -= 1
     return path[i:]
 
-    print(f"These are the abspaths:\n{src}\n{dest}")
-
 def setDest(src, dest):
     if dest == '':
         fname = getFilename(src)
@@ -73,10 +71,12 @@ else:
     dest = setDest(src, args.dest)
     newZip = zipfile.ZipFile(zipname, 'w')
     newZip.write(src, compress_type=zipfile.ZIP_DEFLATED)
+    # [REMOVE]
     print(newZip.namelist())
     zipInfo = newZip.getinfo(newZip.namelist()[0])
     totalfilesize += zipInfo.file_size
     zipfilesize += zipInfo.compress_size
+    # [REMOVE]
     print("og file:", totalfilesize, "\ncompressed:", zipfilesize)
     compression = round(totalfilesize / zipfilesize, 2)
     print(f'Compressed file is {compression}x smaller!')
