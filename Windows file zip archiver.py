@@ -9,18 +9,23 @@ class ArgumentError(Exception):
     def __str__(self):
         return(repr(self.path))
 
-def directoryZip(src, dest, argstr):
+def sortByOptions(src, dest, argstr):
     currdir = src
-    #grab list of files
-    #get opt
-    pass
-
-def listFiles(dir):
-    filelist = []
-    dirlist = []
-    for folders, files in os.walk(dir):
-        print(folders, files)
-    pass
+    filelist = os.walk(src).next()[2]
+    dirlist = os.walk(dir).next()[1]
+    if argstr != []:
+        for opt in argstr:
+            if 'day' in opt:
+                pass
+            elif 'year' in opt:
+                pass
+            elif 'month' in opt:
+                pass
+            elif 'file' in opt:
+                pass
+    else:
+        pass
+    pass  
 
 def getFilename(path):
     i = len(path)
@@ -68,10 +73,8 @@ print("Arg String:",argstr)
 argc = len(sys.argv)
 zipname = args.zip
 
-
 totalfilesize = 0
 zipfilesize = 0
-
 
 # check if src is file or directory if neither, Error
 if not os.path.isfile(args.src):
@@ -84,7 +87,7 @@ if not os.path.isfile(args.src):
         print("Directory Detected.")
         src = os.path.abspath(args.src)
         dest = setDest(src, args.dest)
-        directoryZip(src, dest, parseOptions(argstr))
+        sortByOptions(src, dest, parseOptions(argstr))
 else:
     print("File Detected.")
     print("Zipping File...")
