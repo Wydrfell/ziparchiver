@@ -15,6 +15,13 @@ def directoryZip(src, dest, argstr):
     #get opt
     pass
 
+def listFiles(dir):
+    filelist = []
+    dirlist = []
+    for folders, files in os.walk(dir):
+        print(folders, files)
+    pass
+
 def getFilename(path):
     i = len(path)
     while path[i-1] != "\\":
