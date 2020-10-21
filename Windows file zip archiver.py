@@ -9,7 +9,10 @@ class ArgumentError(Exception):
     def __str__(self):
         return(repr(self.path))
 
-def directoryZip(src, dest):
+def directoryZip(src, dest, argstr):
+    currdir = src
+    #grab list of files
+    #get opt
     pass
 
 def getFilename(path):
@@ -25,6 +28,14 @@ def setDest(src, dest):
         return(os.path.abspath(filedir))
     else:
         return(os.path.abspath(dest))
+
+def parseOptions(argstr):
+    arglist = argstr.split(" ")
+    options = []
+    for a in arglist:
+        if a[:2] == "--":
+            options.append(a)
+    return options
 
 # parse through arguments
 parser = argparse.ArgumentParser(description='Archive and sort some files. List sort options in order by hierarchy.')
@@ -44,6 +55,9 @@ print(args.src, args.dest)
 
 # Keep arg string as is for parsing later
 argstr = ' '.join(sys.argv[1:])
+# [REMOVE] print argstring
+print("Arg String:",argstr)
+
 argc = len(sys.argv)
 zipname = args.zip
 
@@ -61,18 +75,20 @@ if not os.path.isfile(args.src):
             print("Error:", error.path, "is not a valid file or directory path.")
     else:
         print("Directory Detected.")
-        src = src = os.path.abspath(args.src)
+        src = os.path.abspath(args.src)
         dest = setDest(src, args.dest)
-        directoryZip(src, dest)
+        directoryZip(src, dest, parseOptions(argstr))
 else:
     print("File Detected.")
     print("Zipping File...")
     src = os.path.abspath(args.src)
     dest = setDest(src, args.dest)
+    # create a new zipfile
     newZip = zipfile.ZipFile(zipname, 'w')
     newZip.write(src, compress_type=zipfile.ZIP_DEFLATED)
     # [REMOVE]
     print(newZip.namelist())
+    # grab zipfile information
     zipInfo = newZip.getinfo(newZip.namelist()[0])
     totalfilesize += zipInfo.file_size
     zipfilesize += zipInfo.compress_size
