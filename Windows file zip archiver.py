@@ -1,5 +1,6 @@
 #Windows file archiver
-import zipfile, os, shutil, argparse, sys
+import zipfile, os, shutil, argparse, sys, calendar
+from datetime import datetime
 
 class ArgumentError(Exception):
 
@@ -9,23 +10,72 @@ class ArgumentError(Exception):
     def __str__(self):
         return(repr(self.path))
 
-def sortByOptions(src, dest, argstr):
+def sortByOptions(src, dest, optstr):
     currdir = src
-    filelist = os.walk(src).next()[2]
-    dirlist = os.walk(dir).next()[1]
-    if argstr != []:
-        for opt in argstr:
+    print(optstr)
+    filelist = getFiles(src)
+    dirlist = getFolders(src)
+    print(filelist, dirlist)
+    if optstr != []:
+        prevfolders = []
+        for opt in optstr:
             if 'day' in opt:
-                pass
+                prevfolders = dayOpt(src, prevfolders)
             elif 'year' in opt:
-                pass
+                prevfolders = yearOpt(src, prevfolders)
             elif 'month' in opt:
-                pass
+                prevfolders = monthOpt(src, prevfolders)
             elif 'file' in opt:
-                pass
-    else:
+                prevfolders = fileOpt(src, prevfolders)
+   
+    #zip entire directory
+
+    pass
+
+def getFiles(dir):
+    return next(os.walk(dir))[2]
+
+def getFolders(dir):
+    return next(os.walk(dir))[1]
+
+def dayOpt(src, prevfolders):
+    activefolders = prevfolders
+    prevfolders = []
+    pass
+
+def monthOpt(src, prevfolders):
+    activefolders = prevfolders
+    prevfolders = []
+    for folders in activefolders:
+        
+        
+        print(os.path.getctime())
+
         pass
-    pass  
+
+    pass
+
+def yearOpt(src, prevfolders):
+    activefolders = prevfolders
+    prevfolders = []
+    if activefolders == []:
+        flist = getFiles(src)
+        for f in flist:
+            curfile = os.path.join(src, f)
+            month = calendar.month_name[int(datetime.fromtimestamp(os.path.getctime(curfile)).strftime('%m'))]
+            # [REMOVE]
+            # datetime.fromtimestamp(os.path.getctime(curfile)).strftime('%Y-%m-%d %H:%M:%S')
+            print(curfile, month)
+
+            #grab year
+            pass
+
+    pass
+
+def fileOpt(src, prevfolders):
+    activefolders = prevfolders
+    prevfolders = []
+    pass
 
 def getFilename(path):
     i = len(path)
