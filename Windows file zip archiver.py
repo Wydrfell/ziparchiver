@@ -11,6 +11,8 @@ class ArgumentError(Exception):
         return(repr(self.path))
 
 def sortByOptions(src, dest, optstr):
+    foldergroups = []
+    level = 0
     currdir = src
     print(optstr)
     filelist = getFiles(src)
@@ -19,19 +21,23 @@ def sortByOptions(src, dest, optstr):
     if optstr != []:
         prevfolders = []
         for opt in optstr:
+            print("currently working on", opt, "option")
             if 'day' in opt:
-                prevfolders = dayOpt(src, prevfolders)
+                prevfolders = dayOpt(src, prevfolders, foldergroups, level, 'day')
+                level += 1
             elif 'year' in opt:
-                prevfolders = yearOpt(src, prevfolders)
+                prevfolders = yearOpt(src, prevfolders, foldergroups, level, 'year')
+                level += 1
             elif 'month' in opt:
-                prevfolders = monthOpt(src, prevfolders)
-                print("previous folders: ",prevfolders)
+                prevfolders = monthOpt(src, prevfolders, foldergroups, level, 'month')
+                level += 1
+                print("folder groups: ", foldergroups)
             elif 'file' in opt:
-                prevfolders = fileOpt(src, prevfolders)
+                prevfolders = fileOpt(src, prevfolders, foldergroups, level, 'file')
+                level += 1
    
     #zip entire directory
 
-    pass
 
 def getFiles(dir):
     return next(os.walk(dir))[2]
@@ -39,104 +45,116 @@ def getFiles(dir):
 def getFolders(dir):
     return next(os.walk(dir))[1]
 
-def sortNmove(curfolder, folderlist):
+def sortNmove(curfolder, folderlist, foldergroups, opt):
     flist = getFiles(curfolder)
+    print("beginning sort... current option is:" , opt)
     for f in flist:
         curfile = os.path.join(curfolder, f)
-        option = calendar.month_name[int(datetime.fromtimestamp(os.path.getctime(curfile)).strftime('%m'))]
-        folderpath = os.path.join(curfolder, option)
+        if opt == "year":
+            option = datetime.fromtimestamp(os.path.getmtime(curfile)).strftime('%Y')
+        elif opt == "month":
+            option = calendar.month_name[int(datetime.fromtimestamp(os.path.getmtime(curfile)).strftime('%m'))]
+        elif opt == "day":
+            option = datetime.fromtimestamp(os.path.getmtime(curfile)).strftime("%d")
+        else:
+            option = "file extension WIP"
+        
         # [REMOVE]
         # datetime.fromtimestamp().strftime('%Y-%m-%d %H:%M:%S')
         print(curfile, option)
-        if option not in folderlist and not os.path.exists(folderpath):
+        folderpath = os.path.join(curfolder, option)
+        if option not in folderlist or not os.path.exists(folderpath):
             # [REMOVE]
             print("Creating", option, "folder...")
             os.makedirs(folderpath)
             folderlist.append(option)
-        shutil.move(curfile, folderpath)
+        if os.path.isdir(folderpath):
+            shutil.move(curfile, folderpath)
+        else:
+            pass
+        #print("moving:", curfile, "to", folderpath)
+    return folderlist
     
 
-def dayOpt(src, prevfolders):
+def dayOpt(src, prevfolders, foldergroups, level, opt):
     activefolders = prevfolders
-    prevfolders = []
-    pass
-
-def yearOpt(src, prevfolders):
-    activefolders = prevfolders
+    print("active :", activefolders)
     prevfolders = []
     if activefolders == []:
-        flist = getFiles(src)
-        for f in flist:
-            curfile = os.path.join(src, f)
-            year = calendar.month_name[int(datetime.fromtimestamp(os.path.getctime(curfile)).strftime('%Y'))]
-            folderpath = os.path.join(src, month)
-            # [REMOVE]
-            # datetime.fromtimestamp().strftime('%Y-%m-%d %H:%M:%S')
-            print(curfile, month)
-            if month not in prevfolders and not os.path.exists(folderpath):
-                # [REMOVE]
-                print("Creating", month, "folder...")
-                os.makedirs(folderpath)
-                prevfolders.append(month)
-            shutil.move(curfile, folderpath)
+        prevfolders = sortNmove(src, prevfolders, foldergroups, 'day')
     else:
-        for folder in activefolders:
-            curfolder = os.path.join(src, folder)
-            flist = getFiles(curfolder)
-            for f in flist:
-                curfile = os.path.join(curfolder, f)
-                month = calendar.month_name[int(datetime.fromtimestamp(os.path.getctime(curfile)).strftime('%m'))]
-                folderpath = os.path.join(curfolder, month)
-                print(curfile, month)
-                if month not in prevfolders and not os.path.exists(folderpath):
-                    # [REMOVE]
-                    print("Creating", month, "folder...")
-                    os.makedirs(folderpath)
-                    prevfolders.append(month)
-                shutil.move(curfile, folderpath)
+        print("working on 2nd option")
+        for cur_path, directories, files in os.walk(src):
+            for folder in directories:
+                print("looking in", folder)
+                if folder in activefolders:
+                    print(folder, "is in" , activefolders)
+                    curfolder = os.path.join(cur_path, folder)
+                    print("this is:", curfolder)
+                    print(getFiles(curfolder))
+                    os.chdir(curfolder)
+                    prevfolders = sortNmove(curfolder, prevfolders, foldergroups, 'day')
+                    
 
     return(prevfolders)
 
-def monthOpt(src, prevfolders):
+def yearOpt(src, prevfolders, foldergroups, level, opt):
     activefolders = prevfolders
+    print("active :", activefolders)
     prevfolders = []
     if activefolders == []:
-        flist = getFiles(src)
-        for f in flist:
-            curfile = os.path.join(src, f)
-            month = calendar.month_name[int(datetime.fromtimestamp(os.path.getctime(curfile)).strftime('%m'))]
-            folderpath = os.path.join(src, month)
-            # [REMOVE]
-            # datetime.fromtimestamp().strftime('%Y-%m-%d %H:%M:%S')
-            print(curfile, month)
-            if month not in prevfolders and not os.path.exists(folderpath):
-                # [REMOVE]
-                print("Creating", month, "folder...")
-                os.makedirs(folderpath)
-                prevfolders.append(month)
-            shutil.move(curfile, folderpath)
+        prevfolders = sortNmove(src, prevfolders, foldergroups, 'year')
     else:
-        for folder in activefolders:
-            curfolder = os.path.join(src, folder)
-            flist = getFiles(curfolder)
-            for f in flist:
-                curfile = os.path.join(curfolder, f)
-                month = calendar.month_name[int(datetime.fromtimestamp(os.path.getctime(curfile)).strftime('%m'))]
-                folderpath = os.path.join(curfolder, month)
-                print(curfile, month)
-                if month not in prevfolders and not os.path.exists(folderpath):
-                    # [REMOVE]
-                    print("Creating", month, "folder...")
-                    os.makedirs(folderpath)
-                    prevfolders.append(month)
-                shutil.move(curfile, folderpath)
+        print("working on 2nd option")
+        for cur_path, directories in os.walk(src):
+            for folder in directories:
+                print("looking in", folder)
+                if folder in activefolders:
+                    print(folder, "is in" , activefolders)
+                    curfolder = os.path.join(cur_path, folder)
+                    print("this is:", curfolder)
+                    print(getFiles(curfolder))
+                    os.chdir(curfolder)
+                    prevfolders = sortNmove(curfolder, prevfolders, foldergroups, 'year')
+                    
 
     return(prevfolders)
 
-def fileOpt(src, prevfolders):
+def monthOpt(src, prevfolders, foldergroups, level, opt):
+    activefolders = prevfolders
+    print("active :", activefolders)
+    prevfolders = []
+    if activefolders == []:
+        prevfolders = sortNmove(src, prevfolders, foldergroups, 'month')
+    else:
+        #activefolders = foldergroups[level - 1][level - 1]
+        print("working on 2nd option")
+        for cur_path, directories, files in os.walk(src):
+            for folder in directories:
+                print("looking in", folder)
+                if folder in activefolders:
+                    print(folder, "is in" , activefolders)
+                    curfolder = os.path.join(cur_path, folder)
+                    print("this is:", curfolder)
+                    print(getFiles(curfolder))
+                    os.chdir(curfolder)
+                    prevfolders = sortNmove(curfolder, prevfolders, foldergroups, 'month')
+                    
+
+    return(prevfolders)
+
+
+def fileOpt(src, prevfolders, foldergroups, level, opt):
     activefolders = prevfolders
     prevfolders = []
-    pass
+    if activefolders == []:
+        prevfolders = sortNmove(src, prevfolders, foldergroups, 'file')
+    else:
+        for folder in activefolders:
+            curfolder = os.path.join(src, folder)
+            prevfolders = sortNmove(curfolder, prevfolders, foldergroups, 'file')
+
+    return(prevfolders)
 
 def getFilename(path):
     i = len(path)
