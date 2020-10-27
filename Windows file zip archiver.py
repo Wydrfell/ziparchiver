@@ -57,7 +57,8 @@ def sortNmove(curfolder, folderlist, foldergroups, opt):
         elif opt == "day":
             option = datetime.fromtimestamp(os.path.getmtime(curfile)).strftime("%d")
         else:
-            option = "file extension WIP"
+            fname, option = os.path.splitext(curfile)
+            print("The file extension is:", option)
         
         # [REMOVE]
         # datetime.fromtimestamp().strftime('%Y-%m-%d %H:%M:%S')
@@ -74,7 +75,9 @@ def sortNmove(curfolder, folderlist, foldergroups, opt):
             pass
         #print("moving:", curfile, "to", folderpath)
     return folderlist
-    
+
+def uproot(src):
+    pass
 
 def dayOpt(src, prevfolders, foldergroups, level, opt):
     activefolders = prevfolders
@@ -146,13 +149,23 @@ def monthOpt(src, prevfolders, foldergroups, level, opt):
 
 def fileOpt(src, prevfolders, foldergroups, level, opt):
     activefolders = prevfolders
+    print("active :", activefolders)
     prevfolders = []
     if activefolders == []:
         prevfolders = sortNmove(src, prevfolders, foldergroups, 'file')
     else:
-        for folder in activefolders:
-            curfolder = os.path.join(src, folder)
-            prevfolders = sortNmove(curfolder, prevfolders, foldergroups, 'file')
+        #activefolders = foldergroups[level - 1][level - 1]
+        print("working on 2nd option")
+        for cur_path, directories, files in os.walk(src):
+            for folder in directories:
+                print("looking in", folder)
+                if folder in activefolders:
+                    print(folder, "is in" , activefolders)
+                    curfolder = os.path.join(cur_path, folder)
+                    print("this is:", curfolder)
+                    print(getFiles(curfolder))
+                    os.chdir(curfolder)
+                    prevfolders = sortNmove(curfolder, prevfolders, foldergroups, 'file')
 
     return(prevfolders)
 
