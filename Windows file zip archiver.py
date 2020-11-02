@@ -2,6 +2,9 @@
 import zipfile, os, shutil, argparse, sys, calendar
 from datetime import datetime
 
+totalsize = 0
+compressedsize = 0
+
 class ArgumentError(Exception):
 
     def __init__(self,path):
@@ -11,8 +14,6 @@ class ArgumentError(Exception):
         return(repr(self.path))
 
 def sortByOptions(src, dest, optstr):
-    foldergroups = []
-    level = 0
     currdir = src
     print(optstr)
     filelist = getFiles(src)
@@ -23,21 +24,15 @@ def sortByOptions(src, dest, optstr):
         for opt in optstr:
             print("currently working on", opt, "option")
             if 'day' in opt:
-                prevfolders = dayOpt(src, prevfolders, foldergroups, level, 'day')
-                level += 1
+                prevfolders = dayOpt(src, prevfolders, totalsize, 'day')
             elif 'year' in opt:
-                prevfolders = yearOpt(src, prevfolders, foldergroups, level, 'year')
-                level += 1
+                prevfolders = yearOpt(src, prevfolders, totalsize, 'year')
             elif 'month' in opt:
-                prevfolders = monthOpt(src, prevfolders, foldergroups, level, 'month')
-                level += 1
-                print("folder groups: ", foldergroups)
+                prevfolders = monthOpt(src, prevfolders, totalsize, 'month') 
             elif 'file' in opt:
-                prevfolders = fileOpt(src, prevfolders, foldergroups, level, 'file')
-                level += 1
-   
-    #zip entire directory
+                prevfolders = fileOpt(src, prevfolders, totalsize, 'file')
 
+    #zip entire directory
 
 def getFiles(dir):
     return next(os.walk(dir))[2]
@@ -45,7 +40,7 @@ def getFiles(dir):
 def getFolders(dir):
     return next(os.walk(dir))[1]
 
-def sortNmove(curfolder, folderlist, foldergroups, opt):
+def sortNmove(curfolder, folderlist, opt):
     flist = getFiles(curfolder)
     print("beginning sort... current option is:" , opt)
     for f in flist:
@@ -58,13 +53,14 @@ def sortNmove(curfolder, folderlist, foldergroups, opt):
             option = datetime.fromtimestamp(os.path.getmtime(curfile)).strftime("%d")
         else:
             fname, option = os.path.splitext(curfile)
+            option = option.upper()
             print("The file extension is:", option)
         
         # [REMOVE]
         # datetime.fromtimestamp().strftime('%Y-%m-%d %H:%M:%S')
         print(curfile, option)
         folderpath = os.path.join(curfolder, option)
-        if option not in folderlist or not os.path.exists(folderpath):
+        if option not in folderlist and not os.path.exists(folderpath):
             # [REMOVE]
             print("Creating", option, "folder...")
             os.makedirs(folderpath)
@@ -79,12 +75,12 @@ def sortNmove(curfolder, folderlist, foldergroups, opt):
 def uproot(src):
     pass
 
-def dayOpt(src, prevfolders, foldergroups, level, opt):
+def dayOpt(src, prevfolders, totalsize, opt):
     activefolders = prevfolders
     print("active :", activefolders)
     prevfolders = []
     if activefolders == []:
-        prevfolders = sortNmove(src, prevfolders, foldergroups, 'day')
+        prevfolders = sortNmove(src, prevfolders, 'day')
     else:
         print("working on 2nd option")
         for cur_path, directories, files in os.walk(src):
@@ -96,17 +92,17 @@ def dayOpt(src, prevfolders, foldergroups, level, opt):
                     print("this is:", curfolder)
                     print(getFiles(curfolder))
                     os.chdir(curfolder)
-                    prevfolders = sortNmove(curfolder, prevfolders, foldergroups, 'day')
+                    prevfolders = sortNmove(curfolder, prevfolders, 'day')
                     
 
     return(prevfolders)
 
-def yearOpt(src, prevfolders, foldergroups, level, opt):
+def yearOpt(src, prevfolders, totalsize, opt):
     activefolders = prevfolders
     print("active :", activefolders)
     prevfolders = []
     if activefolders == []:
-        prevfolders = sortNmove(src, prevfolders, foldergroups, 'year')
+        prevfolders = sortNmove(src, prevfolders, 'year')
     else:
         print("working on 2nd option")
         for cur_path, directories in os.walk(src):
@@ -118,17 +114,17 @@ def yearOpt(src, prevfolders, foldergroups, level, opt):
                     print("this is:", curfolder)
                     print(getFiles(curfolder))
                     os.chdir(curfolder)
-                    prevfolders = sortNmove(curfolder, prevfolders, foldergroups, 'year')
+                    prevfolders = sortNmove(curfolder, prevfolders, 'year')
                     
 
     return(prevfolders)
 
-def monthOpt(src, prevfolders, foldergroups, level, opt):
+def monthOpt(src, prevfolders, totalsize, opt):
     activefolders = prevfolders
     print("active :", activefolders)
     prevfolders = []
     if activefolders == []:
-        prevfolders = sortNmove(src, prevfolders, foldergroups, 'month')
+        prevfolders = sortNmove(src, prevfolders, 'month')
     else:
         #activefolders = foldergroups[level - 1][level - 1]
         print("working on 2nd option")
@@ -141,18 +137,18 @@ def monthOpt(src, prevfolders, foldergroups, level, opt):
                     print("this is:", curfolder)
                     print(getFiles(curfolder))
                     os.chdir(curfolder)
-                    prevfolders = sortNmove(curfolder, prevfolders, foldergroups, 'month')
+                    prevfolders = sortNmove(curfolder, prevfolders,  'month')
                     
 
     return(prevfolders)
 
 
-def fileOpt(src, prevfolders, foldergroups, level, opt):
+def fileOpt(src, prevfolders, totalsize, opt):
     activefolders = prevfolders
     print("active :", activefolders)
     prevfolders = []
     if activefolders == []:
-        prevfolders = sortNmove(src, prevfolders, foldergroups, 'file')
+        prevfolders = sortNmove(src, prevfolders, 'file')
     else:
         #activefolders = foldergroups[level - 1][level - 1]
         print("working on 2nd option")
@@ -165,7 +161,7 @@ def fileOpt(src, prevfolders, foldergroups, level, opt):
                     print("this is:", curfolder)
                     print(getFiles(curfolder))
                     os.chdir(curfolder)
-                    prevfolders = sortNmove(curfolder, prevfolders, foldergroups, 'file')
+                    prevfolders = sortNmove(curfolder, prevfolders, 'file')
 
     return(prevfolders)
 
